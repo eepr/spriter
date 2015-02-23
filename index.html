@@ -1,0 +1,48 @@
+<!DOCTYPE html>
+<html>
+<head>
+  <title>EeprSprite</title>
+  <!-- <style type="text/css" src="style.css"/> -->
+
+  <script type="text/javascript" src="lodash.min.js"></script>
+
+  <script id="vs-shader" type="x-shader/x-vertex">
+    attribute vec4 position;
+
+    void main(void) {
+        gl_Position = position;
+    }
+  </script>
+  <script id="fs-shader" type="x-shader/x-fragment">
+    #ifdef GL_ES
+    precision highp float;
+    #endif
+
+    uniform sampler2D tex0;
+
+    uniform float time;
+
+    uniform vec2 resolution;
+
+    uniform vec2 mouse;
+
+    void main(void) {
+        vec2 coord = vec2(gl_FragCoord.x, resolution.y - gl_FragCoord.y);
+        vec2 delta = vec2(coord.x - mouse.x, coord.y - mouse.y);
+        float distance = length(delta);
+        vec2 deltaNormal = delta / distance;
+
+        vec2 uv = coord.xy / resolution.xy;
+        uv += deltaNormal * sin(distance * 0.025 - time * 4.0) * 0.25;
+
+        vec3 col = texture2D(tex0, uv).xyz;
+        col *= 100.0 / distance;
+
+        gl_FragColor = vec4(col, 1.0);
+    }
+  </script>
+  <script src="script.js"></script>
+</head>
+<body>
+</body>
+</html>
