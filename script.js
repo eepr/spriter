@@ -8,14 +8,13 @@ window.eepr = _.create({
     },
 });
 
-eepr.define('webgl.FromScratchDemo', function(options) {
+eepr.define('webgl.JustImage', function(options) {
     return _.create(new eepr.webgl.Runner(options), {
         options: options || {},
         shader: null,
         vertexBuffer: null,
         texture: null,
         vertices: null,
-        startTime: null,
         mousePos: {},
 
         initialize: function(/* args */) {
@@ -24,8 +23,7 @@ eepr.define('webgl.FromScratchDemo', function(options) {
                 shaderUtils = eepr.webgl.shaderUtils,
                 vsCode = options.vsCode,
                 fsCode = options.fsCode,
-                gl = this.gl,
-                mousePos = this.mousePos;
+                gl = this.gl;
 
             this.vertices = new Float32Array([
                 -1.0,   -1.0,
@@ -46,16 +44,6 @@ eepr.define('webgl.FromScratchDemo', function(options) {
 
             this.vertexBuffer = gl.createBuffer();
 
-            this.startTime = _.now();
-
-            mousePos.x = this.viewportWidth / 2;
-            mousePos.y = this.viewportHeight / 2;
-
-            this.el.onmousemove = function(e) {
-                mousePos.x = e.clientX;
-                mousePos.y = e.clientY;
-            };
-
             this.renderLoop();
         },
 
@@ -73,18 +61,12 @@ eepr.define('webgl.FromScratchDemo', function(options) {
             gl.bindTexture(gl.TEXTURE_2D, this.texture);
 
             gl.uniform1i(gl.getUniformLocation(this.shader, "tex0"), 0);
-
-            var time = (_.now() - this.startTime) / 1000;
-            gl.uniform1f(gl.getUniformLocation(this.shader, "time"), time);
             gl.uniform2f(gl.getUniformLocation(this.shader, "resolution"), this.viewportWidth, this.viewportHeight);
-            gl.uniform2f(gl.getUniformLocation(this.shader, "mouse"), this.mousePos.x, this.mousePos.y);
 
             gl.viewport(0, 0, this.viewportWidth, this.viewportHeight);
-
             gl.clear(gl.COLOR_BUFFER_BIT | gl.DEPTH_BUFFER_BIT);
 
             gl.bindBuffer(gl.ARRAY_BUFFER, this.vertexBuffer);
-
             gl.bufferData(gl.ARRAY_BUFFER, this.vertices, gl.STATIC_DRAW);
 
             gl.drawArrays(gl.TRIANGLES, 0, this.vertices.length / 2);
@@ -115,7 +97,7 @@ eepr.define('webgl.Runner', function(options) {
 
         renderLoop: function(self) {
             self = self || this;
-            _.delay(self.renderLoop, 1000 / 60, self);
+            _.delay(self.renderLoop, 10000, self);
             self.render && self.render();
         },
     };
@@ -174,7 +156,7 @@ window.onload = function initialize() {
     document.body.appendChild(canvas);
 
     function start() {
-        demo = new eepr.webgl.FromScratchDemo({
+        demo = new eepr.webgl.JustImage({
             image1: image,
             vsCode: document.getElementById("vs-shader").innerHTML,
             fsCode: document.getElementById("fs-shader").innerHTML,
